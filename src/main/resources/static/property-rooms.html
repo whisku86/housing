@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Rooms</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        button { margin: 5px; padding: 6px 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+<h1>Rooms for Property <span id="propId"></span></h1>
+<button onclick="openBulkRoomModal()">Add Multiple Rooms</button>
+<button onclick="window.history.back()">Back to Properties</button>
+
+<table id="roomsTable">
+    <thead><tr><th>Room #</th><th>Price</th><th>Status</th></tr></thead>
+    <tbody id="roomsBody"></tbody>
+</table>
+
+<!-- Bulk Room Modal -->
+<div id="roomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div style="background:white; margin:10% auto; padding:20px; width:400px;">
+        <h3>Add Multiple Rooms</h3>
+        <label>Number of rooms: <input type="number" id="roomCount" min="1" value="1"></label><br><br>
+        <label>Room prefix (e.g., "10"): <input type="text" id="roomPrefix" value="10"></label><br><br>
+        <label>Start number (e.g., "1"): <input type="text" id="roomStart" value="1"></label><br><br>
+        <label>Price: <input type="number" id="roomPrice" step="0.01"></label><br><br>
+        <button onclick="addBulkRooms()">Add Rooms</button>
+        <button onclick="document.getElementById('roomModal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<script>
+    const LANDLORD_ID = localStorage.getItem('landlordId');
+    const PROPERTY_ID = new URLSearchParams(window.location.search).get('propertyId');
+    document.getElementById('propId').textContent = PROPERTY_ID;
+
+    async function fetchRooms() {
+        const res = await fetch(`/api/landlord/properties/${PROPERTY_ID}/rooms`, {
+            headers: { 'X-Landlord-Id': LANDLORD_ID }
+        });
+        const rooms = await res.json();
+        const tbody = document.getElementById('roomsBody');
+        tbody.innerHTML = '';
+        rooms.forEach(r => {
+            const row = tbody.insertRow();
+            row.innerHTML = `<td>${r.roomNumber}</td><td>${r.price}</td><td>${r.status}</td>`;
+        });
+    }
+
+    function openBulkRoomModal() {
+        document.getElementById('roomModal').style.display = 'block';
+    }
+
+    async function addBulkRooms() {
+        const bulkRequest = {
+            count: parseInt(document.getElementById('roomCount').value),
+            roomNumberPrefix: document.getElementById('roomPrefix').value,
+            roomNumberStart: document.getElementById('roomStart').value,
+            price: parseFloat(document.getElementById('roomPrice').value),
+            status: "VACANT"
+        };
+
+        await fetch(`/api/landlord/properties/${PROPERTY_ID}/rooms/bulk`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Landlord-Id': LANDLORD_ID
+            },
+            body: JSON.stringify(bulkRequest)
+        });
+
+        document.getElementById('roomModal').style.display = 'none';
+        fetchRooms(); // Refresh
+    }
+
+    fetchRooms();
+</script>
+</body>
+</html>

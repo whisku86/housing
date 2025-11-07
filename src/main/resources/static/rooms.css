@@ -1,0 +1,293 @@
+/* General Layout */
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom right, #dbdfe0, #fbeaea);
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: rgba(155, 139, 139, 0.712);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 3rem;
+  z-index: 1000;
+}
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  justify-content: space-around;
+  margin-right: 3em;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+  color: #ffd65b;
+}
+
+.auth-btn {
+  background: #ffd65b;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  margin-right: 1em;
+  border-radius: 25px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-btn:hover {
+  background: #ffe684;
+}
+header h1 {
+  font-size: 2.2rem;
+  margin-top: 130px;
+  text-align: center;
+}
+h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #7b5ad4;
+  line-height: 1.3;
+  text-align: left; /* or center if you prefer */
+}
+
+/* Highlighted word */
+.highlight {
+  position: relative;
+  color: #ffcf0e; /* soft yellow */
+}
+
+/* Curved underline effect */
+.highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 8px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="8"><path d="M2,6 Q30,2 98,6" stroke="%23ffdd57" stroke-width="4" fill="none" stroke-linecap="round"/></svg>') no-repeat;
+  background-size: 100% 100%;
+}
+p{
+  text-align: center;
+  margin-top: auto;
+  font-weight: 400;
+  font-family: "Bookman Old Style", serif;
+}
+.rooms-section {
+  padding: 50px 5%;
+}
+
+.category {
+  margin-bottom: 60px;
+}
+
+.category h2 {
+  color: #1500d6;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  border-left: 5px solid #3902ff;
+  padding-left: 10px;
+}
+
+/* Grid Layout */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+/* Room Cards */
+.room-card {
+  background: #97939331;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(214, 0, 0, 0.25);
+}
+
+.room-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.room-info {
+  padding: 15px;
+}
+
+.room-info h3 {
+  color: #2d00f5;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.room-info p {
+  color: #000000;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.view-btn {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: linear-gradient(135deg, #ffaf03, #dba530);
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.view-btn:hover {
+  background: linear-gradient(135deg, #ffc400, #ffa600);
+}
+
+/* Fix image flickering and layout shift */
+.room-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background-color: #e0e0e0; /* Placeholder color while loading */
+    display: block; /* Prevent inline spacing issues */
+}
+
+/* Prevent card height changes during image load */
+.room-card {
+    background: #97939331;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 320px; /* Prevent height jumping */
+}
+
+/* Loading skeleton for images */
+.room-card img[src*="placeholder"] {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth image fade-in after load */
+.room-card img {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+}
+
+.room-card img.loaded {
+    opacity: 1;
+}
+
+
+
+
+/* ====== Footer ====== */
+.footer {
+  text-align: center;
+  background: #f3f3f5;
+  color: #4a3c73;
+  padding: 3rem 2rem;
+  border-top: 2px solid #dcd1f3;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer h3,
+.footer h4 {
+  color: #3a296b;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.footer p,
+.footer a {
+  color: #5c4a8a;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #7a5ce1;
+  text-decoration: underline;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer ul li {
+  margin: 0.5rem 0;
+}
+
+/* Newsletter */
+.footer-newsletter input[type="email"] {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #cfc2ef;
+  border-radius: 6px;
+  outline: none;
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.footer-newsletter input[type="email"]:focus {
+  border-color: #7a5ce1;
+  box-shadow: 0 0 5px rgba(122, 92, 225, 0.3);
+}
+
+.footer-newsletter button {
+  padding: 0.7rem 1.4rem;
+  background: #0f84f1;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.footer-newsletter button:hover {
+  background: #e67e22;
+}
+
+/* Bottom Section */
+.footer-bottom {
+  text-align: center;
+  color: #6f5fa3;
+  border-top: 1px solid #d6c7f2;
+  padding-top: 1rem;
+  font-size: 0.9rem;
+}

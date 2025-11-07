@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landlord Signup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body {
+            background: url('Untitled.png') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            position: relative;
+            width: 350px;
+        }
+        .form-container {
+            background: rgba(0, 0, 0, 0.185);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .icon { font-size: 2rem; margin-bottom: 10px; }
+        h2 { font-size: 22px; margin-bottom: 5px; }
+        p { font-size: 14px; margin-bottom: 15px; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(90deg, #ff66b2, #6a5acd);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.8; }
+        a { color: #e41010; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <form class="form-container" id="signupForm">
+        <div class="icon"><i>🏡</i></div>
+        <h2>Landlord Signup</h2>
+        <p>List your property and connect with students!</p>
+        <input type="text" id="signupName" placeholder="Full Name" required>
+        <input type="email" id="signupEmail" placeholder="Email Address" required>
+        <input type="text" id="signupPhone" placeholder="Phone Number" required>
+        <input type="password" id="signupPassword" placeholder="Password" required minlength="6">
+        <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
+        <button type="button" onclick="signup()">Create Account</button>
+        <p>Already have an account? <a href="login-landlord.html">Sign In</a></p>
+    </form>
+</div>
+
+<script>
+    async function signup() {
+        const name = document.getElementById("signupName").value;
+        const email = document.getElementById("signupEmail").value;
+        const phone = document.getElementById("signupPhone").value;
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById("signupConfirmPassword").value;
+
+        if (!name || !email || !phone || !password || !confirmPassword) {
+            alert("Please fill in all fields!");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        // Landlord DTO structure
+        const landlord = {
+            fullName: name,        // matches LandlordRegisterRequest.fullName
+            email: email,
+            phoneNumber: phone,    // matches phoneNumber
+            password: password
+        };
+
+
+            const response = await fetch("http://127.0.0.1:8080/api/landlords/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(landlord)
+            });
+        const data = await response.json(); // ← parse JSON, not text
+
+        if (response.ok) {
+            // ✅ Save the NEW landlord's ID
+            localStorage.setItem('landlordId', data.landlordId);
+            alert("Account Created Successfully!");
+            window.location.href = "Landlord.html"; // ← go to dashboard
+        } else {
+            alert("Signup failed: " + data.message);
+        }
+    }
+</script>
+</body>
+</html>

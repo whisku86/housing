@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup & Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: url('Untitled.png') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            position: relative;
+            width: 350px;
+        }
+
+        .form-container {
+            background: rgba(0, 0, 0, 0.185);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(90deg, #ff66b2, #6a5acd);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        a {
+            color: #e41010;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SIGNUP FORM (Now this appears first) -->
+    <form class="form-container" id="signupForm">
+        <div class="icon"><i>🧑</i></div>
+        <h2>Create Account</h2>
+        <p>Join our community and unlock amazing benefits!</p>
+        <input type="text" id="signupName" placeholder="Full Name">
+        <input type="email" id="signupEmail" placeholder="Email Address">
+        <input type="text" id="signupPhone" placeholder="Phone Number">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+        <button type="button" onclick="signup()">Create Account</button>
+        <p>Already have an account? <a href="login.html" >Sign In</a></p>
+    </form>
+
+   
+
+<script>
+    
+  // Toggle between login & signup form
+  function toggleForm() {
+      document.getElementById("loginForm").classList.toggle("hidden");
+      document.getElementById("signupForm").classList.toggle("hidden");
+  }
+
+  // Signup Functionality (Send to Spring Boot)
+  async function signup() {
+      let name = document.getElementById("signupName").value;
+      let email = document.getElementById("signupEmail").value;
+      let phone = document.getElementById("signupPhone").value;
+      let password = document.getElementById("signupPassword").value;
+      let confirmPassword = document.getElementById("signupConfirmPassword").value;
+
+      if (!name || !email || !phone || !password || !confirmPassword) {
+          alert("Please fill in all fields!");
+          return;
+      }
+      if(email ==email){
+        alert('Account already exists');
+        return
+      }
+
+      if (password !== confirmPassword) {
+          alert("Passwords do not match!");
+          return;
+      }
+
+      const student = {
+          name: name,
+          email: email,
+          phoneNumber: phone,
+          password: password
+      };
+
+      const response = await fetch("http://127.0.0.1:8080/api/students/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(student)
+      });
+
+      if (response.ok) {
+          alert("Account Created Successfully!");
+          window.location.href="index.html";
+      } else {
+          alert("Signup failed. Please try again.");
+      }
+  }
+
+  
+  
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Landlord Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        button { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 5% auto; padding: 20px; width: 50%; max-width: 600px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        /* Button Styles */
+        .btn-view {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .btn-view:hover {
+            background-color: #45a049;
+        }
+
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .btn-edit:hover {
+            background-color: #0b7dda;
+        }
+
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn-delete:hover {
+            background-color: #da190b;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        #propertyForm input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #propertyImages {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #4CAF50;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+
+        .btn-success:hover {
+            background-color: #0b7dda;
+        }
+        /* Highlight required fields */
+        #priceLabel span {
+            font-weight: normal;
+            font-size: 11px;
+        }
+
+        /* Style for conditional fields */
+        #maxOccupancyGroup {
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        #maxOccupancyGroup.hidden {
+            display: none;
+        }
+
+        /* Price hint styling */
+        #priceHint {
+            font-style: italic;
+            color: #555;
+        }
+
+        /* Small text styling */
+        small {
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>My Properties</h1>
+        <button onclick="openAddPropertyModal()">Add New Property</button>
+    </header>
+
+    <!-- Properties Table -->
+    <table id="propertiesTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Vacant Rooms</th>
+            <th>Price (KES)</th>
+            <th>bills inclusive</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="propertiesBody"></tbody>
+    </table>
+</div>
+
+<!-- Add Property Modal -->
+<div id="propertyModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeModal()" style="float:right; cursor:pointer;">&times;</span>
+        <h2 id="modalTitle">Add Property</h2>
+        <form id="propertyForm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="propName" required>
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="propLocation" required>
+            </div>
+            <div class="form-group">
+                <label>Type:</label>
+                <select id="propType" required onchange="handlePropertyTypeChange()">
+                    <option value="">-- Select Type --</option>
+                    <option value="SINGLE_ROOM">Single Room</option>
+                    <option value="BEDSITTER">Bedsitter</option>
+                    <option value="HOSTEL">Hostel</option>
+                    <option value="ONE_BEDROOM">One Bedroom</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+
+            <!-- Max Occupancy Per Room - ONLY for Hostels -->
+            <div class="form-group" id="maxOccupancyGroup" style="display: none;">
+                <label>Max Occupancy Per Room: <span style="color: #666; font-size: 12px;">(Students per room)</span></label>
+                <input type="number" id="propMaxOccupancy" min="1" max="20" value="2">
+                <small style="color: #666; font-size: 12px;">How many students can share one room?</small>
+            </div>
+
+            <!-- Price Field - Dynamic Label -->
+            <div class="form-group">
+                <label id="priceLabel">Price (KES):</label>
+                <input type="number" id="propPrice" step="0.01" required>
+                <small id="priceHint" style="color: #666; font-size: 12px; display: block; margin-top: 4px;">
+                    Monthly rent amount
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label>Amenities (comma-separated):</label>
+                <input type="text" id="propAmenities" placeholder="WiFi, Water, Electricity">
+            </div>
+            <!-- ADD THIS SECTION -->
+            <div class="form-group">
+                <label>Bills Included in Rent:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billWater" value="water" style="width: auto; margin-right: 8px;">
+                        <span>Water</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billGarbage" value="garbage" style="width: auto; margin-right: 8px;">
+                        <span>Garbage Collection</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billElectricity" value="electricity" style="width: auto; margin-right: 8px;">
+                        <span>Electricity Token</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billWifi" value="wifi" style="width: auto; margin-right: 8px;">
+                        <span>WiFi</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billSecurity" value="security" style="width: auto; margin-right: 8px;">
+                        <span>Security Fee</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="billCleaning" value="cleaning" style="width: auto; margin-right: 8px;">
+                        <span>Common Area Cleaning</span>
+                    </label>
+                </div>
+            </div>
+            <!-- END OF BILLS SECTION -->
+
+            <div class="form-group">
+                <label>Security Details:</label>
+                <textarea id="propSecurity" rows="2"></textarea>
+            </div>
+
+            <div style="margin-top: 15px;">
+            <button type="submit" class="btn-primary">Save Property</button>
+            <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+        <!-- Image Upload Section (shown after property is saved) -->
+        <div id="imageUploadSection" style="display:none; margin-top: 20px; padding: 20px 0; border-top: 2px solid #ddd;">
+            <h3 style="margin-top: 0;">Upload Property Images</h3>
+            <input type="file" id="propertyImages" accept="image/*" multiple style="margin: 10px 0;">
+            <button type="button" onclick="uploadImages()" class="btn-success">Upload Images</button>
+            <button type="button" onclick="closeModal()" class="btn-secondary">Skip & Close</button>
+            <div id="imagePreview" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script src="landlord-dashboard.js"></script>
+</body>
+</html>

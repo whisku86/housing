@@ -1,0 +1,205 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f4f2fa;
+  color: #333;
+}
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: rgba(77, 62, 62, 0.048);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1rem 2rem;
+  z-index: 1000;
+}
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  justify-content: space-around;
+  margin-right: 3em; ;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+  color: #ffd65b;
+}
+
+.auth-btn {
+  background: #ffd65b;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-btn:hover {
+  background: #ffe684;
+}
+
+/* ====== Hero Section ====== */
+.about-hero {
+  background: linear-gradient(to right, rgba(127, 86, 217, 0.5), rgba(159, 122, 234, 0.507)),
+              url('https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  color: rgb(255, 255, 255);
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.about-hero span {
+  color: #ffd86b;
+}
+
+.about-hero p {
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 1.4rem;
+}
+
+/* ====== Mission & Vision ====== */
+.mission-vision {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  padding: 4rem 2rem;
+  background: rgb(230, 227, 224);
+  backdrop-filter: blur(12px);
+}
+
+.mv-card {
+  background: rgba(255, 255, 255, 0.884);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.438);
+}
+
+.mv-card h2 {
+  color: #5b3cc4;
+  margin-bottom: 1rem;
+}
+
+/* ====== Team Section ====== */
+.team {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.team h2 {
+  color: #3e2a72;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.team-members {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.member {
+  background: rgb(255, 255, 255);
+  border-radius: 1rem;
+  overflow: hidden;
+  padding: 1.5rem 1rem;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.438);
+}
+
+.member:hover {
+  transform: translateY(-6px);
+}
+
+.member img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.member h3 {
+  color: #4b3b86;
+  margin-bottom: 0.3rem;
+}
+
+.member p {
+  color: #6b5ca0;
+  font-size: 0.9rem;
+}
+
+/* ====== Footer ====== */
+.footer {
+  background: #2c1f45;
+  color: #ddd;
+  padding: 3rem 2rem;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer h3, .footer h4 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.footer a {
+  color: #c9bff3;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #b8a8e3;
+  border-top: 1px solid #4b3b76;
+  padding-top: 1rem;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 600px) {
+  .mission-vision {
+    flex-direction: column;
+    padding: 2rem 1rem;
+  }
+
+  .about-hero h1 {
+    font-size: 2rem;
+  }
+
+  .member img {
+    height: 150px;
+  }
+}
