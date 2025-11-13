@@ -152,13 +152,13 @@ function handlePropertyTypeChange() {
             priceInput.placeholder = 'e.g., 10000';
             priceInput.min = '1000';
         }
-        console.log('✅ Switched to HOSTEL mode (per semester pricing)');
+        console.log('Switched to HOSTEL mode (per semester pricing)');
 
     } else {
         // Hide max occupancy for other types
         if (maxOccupancyGroup) {
             maxOccupancyGroup.style.display = 'none';
-            console.log('✅ Hiding max occupancy field');
+            console.log('Hiding max occupancy field');
         }
         if (maxOccupancyInput) {
             maxOccupancyInput.required = false;
@@ -428,7 +428,7 @@ document.getElementById('propertyForm').addEventListener('submit', async (e) => 
 
 
 
-// Upload images function
+// Upload images function with detailed error handling
 async function uploadImages() {
     const fileInput = document.getElementById('propertyImages');
     const files = fileInput.files;
@@ -443,10 +443,59 @@ async function uploadImages() {
         return;
     }
 
+    // Validate file sizes before uploading
+    const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+    const maxTotalSize = 50 * 1024 * 1024; // 50MB in bytes
+    let totalSize = 0;
+    const oversizedFiles = [];
+
+    for (let i = 0; i < files.length; i++) {
+        totalSize += files[i].size;
+        if (files[i].size > maxFileSize) {
+            oversizedFiles.push({
+                name: files[i].name,
+                size: (files[i].size / (1024 * 1024)).toFixed(2) + ' MB'
+            });
+        }
+    }
+
+    // Check individual file sizes
+    if (oversizedFiles.length > 0) {
+        const fileList = oversizedFiles.map(f => `- ${f.name} (${f.size})`).join('\n');
+        alert(`Upload Failed: File size limit exceeded\n\nThe following files are too large (max 10MB per file):\n${fileList}\n\nPlease compress or resize these images before uploading.`);
+        return;
+    }
+
+    // Check total upload size
+    if (totalSize > maxTotalSize) {
+        alert(`Upload Failed: Total upload size too large\n\nTotal size: ${(totalSize / (1024 * 1024)).toFixed(2)} MB\nMaximum allowed: 50 MB\n\nPlease reduce the number of images or compress them.`);
+        return;
+    }
+
+    // Check file types
+    const invalidFiles = [];
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+            invalidFiles.push(file.name);
+        }
+    }
+
+    if (invalidFiles.length > 0) {
+        alert(`Upload Failed: Invalid file types\n\nOnly image files are allowed. The following are not images:\n${invalidFiles.join('\n')}`);
+        return;
+    }
+
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
         formData.append('images', files[i]);
     }
+
+    // Show loading indicator
+    const uploadBtn = document.querySelector('button[onclick="uploadImages()"]');
+    const originalText = uploadBtn.textContent;
+    uploadBtn.textContent = 'Uploading...';
+    uploadBtn.disabled = true;
 
     try {
         const res = await fetch(`/api/landlord/properties/${currentPropertyId}/images`, {
@@ -457,18 +506,90 @@ async function uploadImages() {
             body: formData
         });
 
+        // Reset button state
+        uploadBtn.textContent = originalText;
+        uploadBtn.disabled = false;
+
         if (res.ok) {
-            alert('Images uploaded successfully!');
+            const result = await res.json();
+            alert(`Success! ${files.length} image(s) uploaded successfully!`);
             closeModal();
             fetchProperties();
         } else {
-            const err = await res.json();
-            alert('Error uploading images: ' + err.message);
+            // Parse error response
+            const contentType = res.headers.get('content-type');
+            let errorMessage = 'Unknown error occurred';
+
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await res.json();
+                errorMessage = errorData.message || errorData.error || 'Upload failed';
+            } else {
+                const errorText = await res.text();
+
+                // Check for common Spring errors
+                if (errorText.includes('Maximum upload size exceeded')) {
+                    errorMessage = 'File size too large. Maximum allowed:\n- Per file: 10 MB\n- Total upload: 50 MB\n\nPlease compress or resize your images.';
+                } else if (errorText.includes('FileSizeLimitExceededException')) {
+                    errorMessage = 'One or more files exceed the 10 MB size limit.\n\nPlease compress your images before uploading.';
+                } else if (errorText.includes('SizeLimitExceededException')) {
+                    errorMessage = 'Total upload size exceeds 50 MB limit.\n\nPlease reduce the number of images or compress them.';
+                } else {
+                    errorMessage = errorText.substring(0, 200); // Show first 200 chars
+                }
+            }
+
+            alert(`Upload Failed (${res.status})\n\n${errorMessage}`);
         }
     } catch (err) {
-        console.error(err);
-        alert('Network error while uploading images');
+        // Reset button state
+        uploadBtn.textContent = originalText;
+        uploadBtn.disabled = false;
+
+        console.error('Upload error:', err);
+
+        // Provide specific error messages
+        if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+            alert('Network Error: Unable to connect to server.\n\nPlease check:\n- Your internet connection\n- If the server is running\n- If you\'re using the correct URL');
+        } else if (err.name === 'AbortError') {
+            alert('Upload Cancelled: The upload was interrupted.\n\nThis might happen if:\n- Files are too large\n- Connection was lost\n- Request timed out');
+        } else {
+            alert(`Upload Error: ${err.message}\n\nPlease try again or contact support if the problem persists.`);
+        }
     }
+}
+
+// Show info about selected files
+function showFileInfo() {
+    const fileInput = document.getElementById('propertyImages');
+    const fileInfo = document.getElementById('fileInfo');
+    const files = fileInput.files;
+
+    if (files.length === 0) {
+        fileInfo.innerHTML = '';
+        return;
+    }
+
+    let totalSize = 0;
+    let fileList = [];
+
+    for (let i = 0; i < files.length; i++) {
+        const size = (files[i].size / (1024 * 1024)).toFixed(2);
+        totalSize += files[i].size;
+
+        const sizeColor = files[i].size > 10 * 1024 * 1024 ? 'red' : 'green';
+        fileList.push(`<div>✓ ${files[i].name} (<span style="color: ${sizeColor}">${size} MB</span>)</div>`);
+    }
+
+    const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
+    const totalColor = totalSize > 50 * 1024 * 1024 ? 'red' : 'green';
+
+    fileInfo.innerHTML = `
+        <strong>Selected ${files.length} file(s):</strong>
+        ${fileList.join('')}
+        <div style="margin-top: 5px; font-weight: bold;">
+            Total size: <span style="color: ${totalColor}">${totalMB} MB</span> / 50 MB
+        </div>
+    `;
 }
 
 // View rooms for a property

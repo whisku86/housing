@@ -288,10 +288,26 @@
             <button type="button" onclick="closeModal()" class="btn-secondary">Cancel</button>
             </div>
         </form>
+
         <!-- Image Upload Section (shown after property is saved) -->
         <div id="imageUploadSection" style="display:none; margin-top: 20px; padding: 20px 0; border-top: 2px solid #ddd;">
             <h3 style="margin-top: 0;">Upload Property Images</h3>
-            <input type="file" id="propertyImages" accept="image/*" multiple style="margin: 10px 0;">
+
+            <!-- Add file size info -->
+            <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
+                Requirements: Max 10 MB per image | Max 50 MB total | JPG, PNG, WEBP formats
+            </p>
+
+            <input type="file"
+                   id="propertyImages"
+                   accept="image/*"
+                   multiple
+                   style="margin: 10px 0;"
+                   onchange="showFileInfo()">
+
+            <!-- Show selected files info -->
+            <div id="fileInfo" style="margin: 10px 0; font-size: 13px; color: #666;"></div>
+
             <button type="button" onclick="uploadImages()" class="btn-success">Upload Images</button>
             <button type="button" onclick="closeModal()" class="btn-secondary">Skip & Close</button>
             <div id="imagePreview" style="margin-top: 10px;"></div>
