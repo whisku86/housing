@@ -90,6 +90,53 @@ p{
   font-weight: 400;
   font-family: "Bookman Old Style", serif;
 }
+
+/* ===== Sorting Bar ===== */
+.sorting-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.sorting-bar label {
+    font-weight: bold;
+    color: #333;
+}
+
+.sorting-bar select {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sorting-bar select:hover,
+.sorting-bar select:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+    outline: none;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 600px) {
+    .sorting-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .sorting-bar label {
+        margin-bottom: 5px;
+    }
+}
+
 .rooms-section {
   padding: 50px 5%;
 }
