@@ -31,7 +31,30 @@
       <h1>Search, explore and<br>book your <span class="highlight">room!</span></h1>
       <p>Browse available units by category — all verified for safety and comfort.</p>
     </header>
+    <!-- ===== Sorting Bar ===== -->
+    <div class="sorting-bar">
+      <label>Sort by:</label>
 
+      <select id="sortSize">
+        <option value="">Size</option>
+        <option value="bedsitter">Bedsitter</option>
+        <option value="single room">Single Room</option>
+        <option value="one bedroom">One Bedroom</option>
+      </select>
+
+      <select id="sortPrice">
+        <option value="">Price Range</option>
+        <option value="1">Up to Ksh 5,000</option>
+        <option value="2">Ksh 5,001–10,000</option>
+        <option value="3">Above 10,000</option>
+      </select>
+
+      <select id="sortLocation">
+        <option value="">Location</option>
+        <option value="Mwembe">Mwembe</option>
+        <option value="Roma">Roma</option>
+      </select>
+    </div>
     <main class="rooms-section">
         <!-- ===== Single Rooms ===== -->
         <section class="category">
