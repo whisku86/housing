@@ -12,9 +12,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Add BOTH beans - one for BCryptPasswordEncoder and one for PasswordEncoder
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Use BCryptPasswordEncoder (more secure than NoOpPasswordEncoder)
         return new BCryptPasswordEncoder();
     }
 
