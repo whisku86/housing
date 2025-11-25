@@ -1,63 +1,36 @@
 package com.smart_housing.smart_housing.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "admin")
+@Table(name = "admins")
+@Data
 public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(unique = true, nullable = false)
+    private String username;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private String password;
 
-    // Constructors
-    public Admin() {}
+    @Enumerated(EnumType.STRING)
+    private AdminRole role;
 
-    public Admin(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
+    @Enumerated(EnumType.STRING)
+    private AdminStatus status;
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 }

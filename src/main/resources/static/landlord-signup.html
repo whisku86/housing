@@ -92,11 +92,10 @@
             return;
         }
 
-        // Landlord DTO structure
         const landlord = {
-            fullName: name,        // matches LandlordRegisterRequest.fullName
+            name: name,        // ✓ Changed from fullName
             email: email,
-            phoneNumber: phone,    // matches phoneNumber
+            phone: phone,      // ✓ Changed from phoneNumber
             password: password
         };
 

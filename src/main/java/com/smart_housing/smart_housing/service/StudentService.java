@@ -5,6 +5,8 @@ import com.smart_housing.smart_housing.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class StudentService {
 
@@ -28,5 +30,13 @@ public class StudentService {
             return "Incorrect password!";
         }
         return "Login successful!";
+    }
+
+    public long getTotalStudents() {
+        return studentRepository.count();
+    }
+
+    public List<Student> getAllStudents() {
+        return studentRepository.findAll();
     }
 }

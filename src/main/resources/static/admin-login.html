@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HostelHub | Admin Login</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap">
+
+    <style>
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1500&q=80") center/cover no-repeat;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container {
+            background: rgba(148, 14, 126, 0.11);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 50px;
+            box-shadow: 0 8px 20px rgb(0, 0, 0);
+            width: 350px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .form-box h2 {
+            margin-bottom: 25px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.281);
+            color: #000000f5;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #000000;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #0c53ec;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #0073ff5b;
+        }
+
+        .switch {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .switch a {
+            color: #00ffea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        form {
+            display: none;
+            transition: all 0.4s ease;
+        }
+
+        form.active {
+            display: block;
+        }
+
+        .error-message {
+                background: #fee;
+                border: 1px solid #fcc;
+                color: #c33;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                font-size: 14px;
+                display: none;
+            }
+
+            .error-message.show {
+                display: block;
+            }
+
+            /* Popup notification */
+            #popup {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                border-radius: 10px;
+                color: white;
+                font-size: 15px;
+                font-weight: 500;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 1000;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            }
+
+
+            /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .footer-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 40px 30px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+
+
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="form-box">
+        <h2 id="formTitle">Admin Login</h2>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- Login form -->
+    <form id="loginForm" class="active">
+        <input type="text" id="loginEmail" placeholder="Email" required />
+        <input type="password" id="loginPassword" placeholder="Password" required />
+        <button type="submit" class="btn">Login</button>
+    </form>
+
+    <!-- Added "Back to Homepage" link -->
+    <div class="footer-text">
+        <a href="index.html">← Back to Homepage</a>
+    </div>
+</div>
+</div>
+<script>
+    // ======= Element References =======
+    const loginForm = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("loginEmail");      // ✅ Fixed
+    const passwordInput = document.getElementById("loginPassword");   // ✅ Fixed
+    const errorMessage = document.getElementById("errorMessage");
+
+    // ======= Popup Function =======
+    function showPopup(message, color = "#4caf50", duration = 2500) {
+        let popup = document.getElementById("popup");
+        if (!popup) {
+            popup = document.createElement("div");
+            popup.id = "popup";
+            document.body.appendChild(popup);
+        }
+
+        popup.textContent = message;
+        popup.style.backgroundColor = color;
+        popup.style.opacity = "1";
+
+        setTimeout(() => {
+            popup.style.opacity = "0";
+        }, duration);
+    }
+
+    // ======= Show Error Message =======
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add("show");
+
+        setTimeout(() => {
+            errorMessage.classList.remove("show");
+        }, 5000);
+    }
+
+    // ======= Clear Error Message =======
+    function clearError() {
+        errorMessage.classList.remove("show");
+    }
+
+    // Clear error when user starts typing
+    usernameInput.addEventListener("input", clearError);
+    passwordInput.addEventListener("input", clearError);
+
+    // ======= Admin Login =======
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearError();
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        console.log("Attempting login with username:", username); // Debug log
+
+        // Validate inputs
+        if (!username || !password) {
+            showError("Please fill in all fields");
+            return;
+        }
+
+        // Get the submit button
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.innerHTML = '<span class="spinner"></span>Logging in...';
+
+        try {
+            console.log("Sending request to /api/admin/login"); // Debug log
+
+            // Call backend API
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+
+            console.log("Response status:", response.status); // Debug log
+
+            const data = await response.json();
+            console.log("Response data:", data); // Debug log
+
+            if (response.ok) {
+                // Login successful
+                console.log("Login successful!"); // Debug log
+
+                // Store admin session data
+                localStorage.setItem('adminId', data.adminId);
+                localStorage.setItem('adminUsername', data.username);
+                localStorage.setItem('adminRole', data.role);
+                localStorage.setItem('isAdminLoggedIn', 'true');
+
+                showPopup("✅ Login successful!", "#4caf50");
+
+                // Redirect to admin dashboard
+                setTimeout(() => {
+                    window.location.href = "Admin-dashboard.html";
+                }, 1000);
+
+            } else {
+                // Login failed
+                console.error("Login failed:", data.message); // Debug log
+                showError(data.message || "Invalid credentials");
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+
+        } catch (error) {
+            console.error('Login error:', error); // Debug log
+            showError("Network error. Please check your connection and try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // ======= Check if already logged in =======
+    window.addEventListener('DOMContentLoaded', () => {
+        const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
+        if (isLoggedIn === 'true') {
+            console.log("Already logged in, redirecting..."); // Debug log
+            // Already logged in, redirect to dashboard
+            window.location.href = "Admin-dashboard.html";
+        }
+    });
+</script>
+</body>
+</html>

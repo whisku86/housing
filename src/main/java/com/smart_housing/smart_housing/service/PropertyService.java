@@ -48,9 +48,9 @@ public class PropertyService {
 
         // Get all properties for public viewing
         public List<Property> getAllPublicProperties() {
-            return propertyRepository.findAll();
+            // returns only properties from ACTIVE landlords with APPROVED status
+            return propertyRepository.findActivePropertiesFromActiveLandlords();
         }
-
         // Get properties by type
         public List<Property> getPropertiesByType(PropertyType type) {
             return propertyRepository.findByType(type);
@@ -148,5 +148,42 @@ public class PropertyService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to remove image", e);
         }
+    }
+    // In PropertyService.java
+
+    public long getTotalProperties() {
+        return propertyRepository.count();
+    }
+
+    public long getPendingPropertiesCount() {
+        return propertyRepository.countByStatus("PENDING");
+    }
+
+    public long getActivePropertiesCount() {
+        return propertyRepository.countByStatus("APPROVED");
+    }
+    // For admin view - UNFILTERED (shows all properties)
+    public List<Property> getAllProperties() {
+        return propertyRepository.findAll();
+    }
+
+    @Transactional
+    public void approveProperty(Long id, Long adminId) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+        property.setStatus("APPROVED");
+        property.setApprovedAt(java.time.LocalDateTime.now());
+        property.setApprovedBy(adminId);
+        propertyRepository.save(property);
+    }
+
+    @Transactional
+    public void rejectProperty(Long id, Long adminId) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+        property.setStatus("REJECTED");
+        property.setApprovedAt(java.time.LocalDateTime.now());
+        property.setApprovedBy(adminId);
+        propertyRepository.save(property);
     }
 }

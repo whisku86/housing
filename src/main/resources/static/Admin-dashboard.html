@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | HostelHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(135deg, #347655 0%, #66eadb 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sidebar .logout {
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 40px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+        }
+
+        .user-info {
+            color: #666;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-card.green .number { color: #4caf50; }
+        .stat-card.orange .number { color: #ff9800; }
+        .stat-card.red .number { color: #f44336; }
+        .stat-card.blue .number { color: #2196f3; }
+        .stat-card.purple .number { color: #9c27b0; }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .chart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .chart-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .chart-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .chart-bar {
+            height: 30px;
+            background: #667eea;
+            border-radius: 5px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar::before {
+            content: attr(data-percentage);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Recent Activity Feed */
+        .activity-feed {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .activity-feed h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .activity-item.success {
+            border-left-color: #4caf50;
+        }
+
+        .activity-item.warning {
+            border-left-color: #ff9800;
+        }
+
+        .activity-item.danger {
+            border-left-color: #f44336;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .activity-text {
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge.approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge.active {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge.suspended {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+            margin-right: 5px;
+        }
+
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-suspend {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .tab-buttons {
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Two column layout for activity and charts */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>🏠 HostelHub Admin</h2>
+    <nav>
+        <a href="#" class="active" onclick="showSection('dashboard')">📊 Dashboard</a>
+        <a href="#" onclick="showSection('landlords')">👥 Landlords</a>
+        <a href="#" onclick="showSection('properties')">🏢 Properties</a>
+    </nav>
+    <button class="btn btn-reject logout" onclick="logout()">Logout</button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <div class="user-info">
+            Welcome, <strong id="adminUsername">Admin</strong>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Properties</h3>
+                <div class="number" id="totalProperties">0</div>
+            </div>
+            <div class="stat-card green">
+                <h3>Active Properties</h3>
+                <div class="number" id="activeProperties">0</div>
+            </div>
+            <div class="stat-card orange">
+                <h3>Pending Approval</h3>
+                <div class="number" id="pendingProperties">0</div>
+            </div>
+            <div class="stat-card red">
+                <h3>Total Landlords</h3>
+                <div class="number" id="totalLandlords">0</div>
+            </div>
+            <div class="stat-card blue">
+                <h3>Total Students/Users</h3>
+                <div class="number" id="totalUsers">0</div>
+            </div>
+            <div class="stat-card purple">
+                <h3>Total Vacant Rooms</h3>
+                <div class="number" id="totalVacantRooms">0</div>
+            </div>
+        </div>
+
+        <!-- Charts and Activity Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Column: Charts -->
+            <div>
+                <div class="charts-grid">
+                    <!-- Properties by Type -->
+                    <div class="chart-card">
+                        <h3>Properties by Type</h3>
+                        <div id="propertiesByType">
+                            <div class="loading">Loading data...</div>
+                        </div>
+                    </div>
+
+                    <!-- Properties by Location -->
+                    <div class="chart-card">
+                        <h3>Properties by Location</h3>
+                        <div id="propertiesByLocation">
+                            <div class="loading">Loading data...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Activity Feed -->
+            <div>
+                <div class="activity-feed">
+                    <h3>Recent Activity</h3>
+                    <div id="activityFeed">
+                        <div class="loading">Loading activity...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Landlords Section -->
+    <div id="landlordsSection" class="section" style="display: none;">
+        <h2>Manage Landlords</h2>
+        <div class="loading" id="landlordsLoading">Loading landlords...</div>
+        <table id="landlordsTable" style="display: none;">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Properties</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="landlordsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Properties Section -->
+    <div id="propertiesSection" class="section" style="display: none;">
+        <h2>Manage Properties</h2>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="filterProperties('all')">All</button>
+            <button class="tab-btn" onclick="filterProperties('PENDING')">Pending</button>
+            <button class="tab-btn" onclick="filterProperties('APPROVED')">Approved</button>
+            <button class="tab-btn" onclick="filterProperties('REJECTED')">Rejected</button>
+        </div>
+
+        <div class="loading" id="propertiesLoading">Loading properties...</div>
+        <table id="propertiesTable" style="display: none;">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Price</th>
+                <th>Vacant Rooms</th>
+                <th>Landlord</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="propertiesBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="Admin-dashboard.js"></script>
+</body>
+</html>
