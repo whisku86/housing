@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Details | HostelHub</title>
-    <link rel="stylesheet" href="property-details.css">
+    <link rel="stylesheet" href="css/property-details.css">
 </head>
 <body>
 <!-- Navigation -->
@@ -103,6 +103,30 @@
                     <p id="vacantCount">Loading...</p>
                 </div>
             </div>
+            <!-- BOOKING SECTION -->
+            <div> <div id="bookingSection" class="booking-card" style="display: none;">
+                <h3>📅 Book this Property</h3>
+                <p class="booking-hint">Select dates to request a stay.</p>
+
+                <div class="date-group">
+                    <label>Check-in Date</label>
+                    <input type="date" id="bookStart" class="form-input">
+                </div>
+
+                <div class="date-group">
+                    <label>Check-out Date</label>
+                    <input type="date" id="bookEnd" class="form-input">
+                </div>
+
+                <button id="bookBtn" class="btn-book">Request to Book</button>
+                <p id="bookMsg" class="booking-msg"></p>
+            </div>
+
+                <div class="contact-card">
+                    <h3>Interested in this property?</h3>
+                </div>
+
+            </div>
 
             <!-- Right Column: Contact Form -->
             <div class="contact-card">
@@ -157,6 +181,6 @@
     <p>© 2025 HostelHub. All rights reserved.</p>
 </footer>
 
-<script src="property-details.js"></script>
+<script src="js/property-details.js"></script>
 </body>
 </html>

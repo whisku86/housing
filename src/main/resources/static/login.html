@@ -110,41 +110,50 @@
 <script>
     
   // Handle form submission
-  document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const user = {
-      email: document.getElementById("email").value,
-      password: document.getElementById("password").value
-    };
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    if (!user.email || !user.password) {
+      if (!email || !password) {
       alert("Please fill in all fields!");
       return;
-    }
+  }
 
-    try {
-      const response = await fetch("http://127.0.0.1:8080/api/students/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
-      });
-
-      const message = await response.text();
-
-      if (response.ok) {
-        alert(message);
-        window.location.href = "Landlord.html"; // redirect to home page
-      } else {
-        alert("Login failed: " + message);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Unable to connect to the server.");
-    }
+      try {
+      const response = await fetch("http://localhost:8080/api/students/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
   });
 
+      // Parse response as JSON
+      const data = await response.json();
 
+      if (response.ok) {
+      // 1. SAVE USER DATA (Crucial for Booking)
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+
+      // 2. CHECK FOR REDIRECT
+      // (This handles the "Login to Book" flow)
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
+
+      if (redirectUrl) {
+      window.location.href = redirectUrl; // Go back to Property Details
+  } else {
+      window.location.href = "index.html"; // Default to Home
+  }
+  } else {
+      alert("Login Failed: " + (data.message || "Invalid credentials"));
+  }
+  } catch (error) {
+      console.error("Error:", error);
+      alert("Unable to connect to server. Is the backend running?");
+  }
+  });
 
 </script>
 </body>

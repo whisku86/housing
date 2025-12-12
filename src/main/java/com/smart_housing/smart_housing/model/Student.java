@@ -2,9 +2,11 @@
 package com.smart_housing.smart_housing.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "student")
+@Data
 public class Student {
 
     @Id

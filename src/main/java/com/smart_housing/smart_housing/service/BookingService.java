@@ -18,33 +18,52 @@ public class BookingService {
     private final PropertyRepository propertyRepo;
 
     @Transactional
-    public Booking createBooking(Long studentId, Long roomId, LocalDate start, LocalDate end) {
-        // 1 student – 1 active booking rule
-        if (bookingRepo.findByStudentIdAndStatus(studentId, Booking.Status.CONFIRMED).isPresent())
+    public Booking createBooking(Long studentId, Long propertyId, LocalDate start, LocalDate end) {
+
+        // 1. Check if student already has a confirmed booking
+        if (bookingRepo.findByStudentIdAndStatus(studentId, Booking.Status.CONFIRMED).isPresent()) {
             throw new IllegalStateException("You already have a confirmed booking.");
+        }
 
-        Room room = roomRepo.findById(roomId)
-                .orElseThrow(() -> new NoSuchElementException("Room not found"));
+        // 2. Find the Property first (to get max occupancy rules)
+        Property property = propertyRepo.findById(propertyId)
+                .orElseThrow(() -> new NoSuchElementException("Property not found"));
 
-        if (room.getStatus() != RoomStatus.VACANT)
-            throw new IllegalStateException("Room is not available");
+        // 3. AUTO-ASSIGN: Find a valid room within this property
+        // We look for all rooms in this property and check which one has space.
+        List<Room> rooms = roomRepo.findByPropertyId(propertyId); // You need to add this method to RoomRepository
 
-        Property property = propertyRepo.findById(room.getPropertyId())
-                .orElseThrow();
+        Room selectedRoom = null;
 
-        // occupancy check
-        long current = bookingRepo.countByRoomIdAndStatus(roomId, Booking.Status.CONFIRMED);
-        if (current >= property.getMaxOccupancy())
-            throw new IllegalStateException("Room already at max occupancy");
+        for (Room room : rooms) {
+            long currentBookings = bookingRepo.countByRoomIdAndStatus(room.getId(), Booking.Status.CONFIRMED);
 
+            // If room is not full, pick it!
+            if (currentBookings < property.getMaxOccupancy()) {
+                selectedRoom = room;
+                break;
+            }
+        }
+
+        if (selectedRoom == null) {
+            throw new IllegalStateException("No rooms available in this property.");
+        }
+
+        // 4. Create the Booking
         Booking b = new Booking();
         b.setStudentId(studentId);
-        b.setRoomId(roomId);
+        b.setRoomId(selectedRoom.getId()); // We save the specific Room ID
         b.setStartDate(start);
         b.setEndDate(end);
-        b.setStatus(Booking.Status.CONFIRMED);   // skip payment for MVP
-        room.setStatus(RoomStatus.OCCUPIED);
-        roomRepo.save(room);
+        b.setStatus(Booking.Status.CONFIRMED);
+
+        // 5. Update Room Status (Only mark FULL if max occupancy is reached)
+        long newCount = bookingRepo.countByRoomIdAndStatus(selectedRoom.getId(), Booking.Status.CONFIRMED) + 1;
+        if (newCount >= property.getMaxOccupancy()) {
+            selectedRoom.setStatus(RoomStatus.OCCUPIED); // Mark as full
+            roomRepo.save(selectedRoom);
+        }
+
         return bookingRepo.save(b);
     }
 
@@ -56,15 +75,19 @@ public class BookingService {
     public void cancelBooking(Long bookingId, Long studentId) {
         Booking b = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new NoSuchElementException("Booking not found"));
+
         if (!b.getStudentId().equals(studentId))
             throw new IllegalStateException("Not your booking");
 
         b.setStatus(Booking.Status.CANCELLED);
         bookingRepo.save(b);
 
-        // free the room if no other confirmed booking
-        if (bookingRepo.countByRoomIdAndStatus(b.getRoomId(), Booking.Status.CONFIRMED) == 0) {
-            Room r = roomRepo.findById(b.getRoomId()).orElseThrow();
+        // Free up the room
+        Room r = roomRepo.findById(b.getRoomId()).orElseThrow();
+
+        // If it was full, it is now VACANT (or available)
+        // Ideally, change status back to VACANT only if count < max
+        if (r.getStatus() == RoomStatus.OCCUPIED) {
             r.setStatus(RoomStatus.VACANT);
             roomRepo.save(r);
         }

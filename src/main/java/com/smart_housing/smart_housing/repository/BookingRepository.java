@@ -8,6 +8,7 @@ import java.util.*;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+
     Optional<Booking> findByStudentIdAndStatus(Long studentId, Booking.Status status);
 
     List<Booking> findByStudentIdOrderByCreatedAtDesc(Long studentId);

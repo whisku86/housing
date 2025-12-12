@@ -39,4 +39,13 @@ public class StudentService {
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
+
+    public Student authenticate(String email, String password) {
+        Student student = studentRepository.findByEmail(email);
+        if (student != null && student.getPassword().equals(password)) {
+            return student; // authentication successful
+        }
+        return null; // authentication failed
+    }
+
 }

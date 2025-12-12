@@ -50,7 +50,7 @@ async function loadPropertyDetails() {
         propertyData = await response.json();
         console.log('Property data:', propertyData);
 
-        // Fetch vacant room count from PUBLIC endpoint
+        // Fetch vacant room count
         let vacantRoomCount = 0;
         try {
             const vacantResponse = await fetch(`/api/public/properties/${propertyId}/vacant-count`);
@@ -97,22 +97,18 @@ function displayPropertyDetails(property, vacantRoomCount) {
         maxOccupancy.textContent = `${property.maxOccupancy} people per room`;
     }
 
-    // Display images - Handle both JSON string and array
+    // Display images
     if (property.images) {
         try {
-            // If images is a string, parse it
             if (typeof property.images === 'string') {
                 propertyImages = JSON.parse(property.images);
             } else if (Array.isArray(property.images)) {
                 propertyImages = property.images;
             }
 
-            console.log('Parsed images:', propertyImages);
-
             if (propertyImages.length > 0) {
                 displayImages();
             } else {
-                // No images, use placeholder
                 propertyImages = ['pics-logos/placeholder.png'];
                 displayImages();
             }
@@ -122,12 +118,11 @@ function displayPropertyDetails(property, vacantRoomCount) {
             displayImages();
         }
     } else {
-        // No images field, use placeholder
         propertyImages = ['pics-logos/placeholder.png'];
         displayImages();
     }
 
-    // Display amenities - Handle both JSON string and array
+    // Display amenities
     if (property.amenities) {
         try {
             let amenitiesArray = property.amenities;
@@ -143,14 +138,13 @@ function displayPropertyDetails(property, vacantRoomCount) {
                 amenitiesList.innerHTML = '<span class="tag">None specified</span>';
             }
         } catch (e) {
-            console.error('Error parsing amenities:', e);
             amenitiesList.innerHTML = '<span class="tag">None specified</span>';
         }
     } else {
         amenitiesList.innerHTML = '<span class="tag">None specified</span>';
     }
 
-    // Display bills - Handle both JSON string and array
+    // Display bills
     if (property.bills) {
         try {
             let billsArray = property.bills;
@@ -159,15 +153,7 @@ function displayPropertyDetails(property, vacantRoomCount) {
             }
 
             if (Array.isArray(billsArray) && billsArray.length > 0) {
-                const billIcons = {
-                    water: '💧',
-                    garbage: '🗑️',
-                    electricity: '⚡',
-                    wifi: '📶',
-                    security: '🔒',
-                    cleaning: '🧹'
-                };
-
+                const billIcons = { water: '💧', garbage: '🗑️', electricity: '⚡', wifi: '📶', security: '🔒', cleaning: '🧹' };
                 billsList.innerHTML = billsArray
                     .map(bill => `<span class="tag">${billIcons[bill] || '✓'} ${bill}</span>`)
                     .join('');
@@ -175,40 +161,55 @@ function displayPropertyDetails(property, vacantRoomCount) {
                 billsList.innerHTML = '<span class="tag">None included</span>';
             }
         } catch (e) {
-            console.error('Error parsing bills:', e);
             billsList.innerHTML = '<span class="tag">None included</span>';
         }
     } else {
         billsList.innerHTML = '<span class="tag">None included</span>';
     }
 
-    // Display security details
+    // Security Details
     if (property.securityDetails) {
         securityDetails.textContent = property.securityDetails;
     } else {
         securitySection.style.display = 'none';
     }
 
-    // Display vacant room count
+    // Vacant Room Count
     vacantCount.textContent = `${vacantRoomCount} vacant room${vacantRoomCount !== 1 ? 's' : ''} available`;
-}
+
+    // --- BOOKING LOGIC (MOVED INSIDE FUNCTION CORRECTLY) ---
+    const user = JSON.parse(localStorage.getItem('user'));
+    const bookingSection = document.getElementById('bookingSection');
+
+    // Only show booking form if user is logged in AND is a student
+    if (user && user.role === 'STUDENT') {
+        bookingSection.style.display = 'block';
+
+        // Set up the Book Button Listener
+        const bookBtn = document.getElementById('bookBtn');
+        // Clone to remove old listeners
+        const newBtn = bookBtn.cloneNode(true);
+        bookBtn.parentNode.replaceChild(newBtn, bookBtn);
+
+        // PASS THE PROPERTY ID CORRECTLY
+        newBtn.addEventListener('click', () => handleBooking(property.id));
+    } else if (!user) {
+        // Show login prompt if not logged in
+        bookingSection.style.display = 'block';
+        bookingSection.innerHTML = `<button class="btn-submit" onclick="window.location.href='login.html'">Login to Book this Room</button>`;
+    }
+} // <--- END OF displayPropertyDetails
 
 function displayImages() {
     if (propertyImages.length === 0) return;
 
-    console.log('Displaying images:', propertyImages);
-
-    // Set main image
     mainImage.src = propertyImages[currentImageIndex];
     mainImage.alt = propertyData?.name || 'Property image';
-    mainImage.onerror = function() {
-        this.src = 'pics-logos/placeholder.png';
-    };
+    mainImage.onerror = function() { this.src = 'pics-logos/placeholder.png'; };
 
-    // Update counter
     imageCounter.textContent = `${currentImageIndex + 1} / ${propertyImages.length}`;
 
-    // Generate thumbnails
+    // FIXED: Correct HTML image tag syntax here
     thumbnailContainer.innerHTML = propertyImages
         .map((img, idx) => `
             <img src="${img}" 
@@ -231,17 +232,8 @@ function formatPrice(price) {
 }
 
 function formatPropertyType(type) {
-    if (!type) return 'Property';
-
-    const typeMap = {
-        'SINGLE_ROOM': 'Single Room',
-        'BEDSITTER': 'Bedsitter',
-        'HOSTEL': 'Hostel',
-        'ONE_BEDROOM': 'One Bedroom',
-        'OTHER': 'Other'
-    };
-
-    return typeMap[type] || type;
+    const typeMap = { 'SINGLE_ROOM': 'Single Room', 'BEDSITTER': 'Bedsitter', 'HOSTEL': 'Hostel', 'ONE_BEDROOM': 'One Bedroom', 'OTHER': 'Other' };
+    return typeMap[type] || type || 'Property';
 }
 
 function showError(message) {
@@ -250,38 +242,80 @@ function showError(message) {
     errorMessage.textContent = message;
 }
 
-// Handle contact form submission
-const contactForm = document.getElementById('contactForm');
-contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Handle booking logic
+async function handleBooking(propertyId) {
+    const startInput = document.getElementById('bookStart');
+    const endInput = document.getElementById('bookEnd');
+    const msg = document.getElementById('bookMsg');
+    const user = JSON.parse(localStorage.getItem('user'));
 
-    const formData = {
+    if (!startInput.value || !endInput.value) {
+        alert("Please select both start and end dates.");
+        return;
+    }
+
+    const bookingData = {
+        studentId: user.id,
         propertyId: propertyId,
-        propertyName: propertyData?.name || 'Unknown Property',
-        name: document.getElementById('contactName').value,
-        email: document.getElementById('contactEmail').value,
-        phone: document.getElementById('contactPhone').value,
-        message: document.getElementById('contactMessage').value
+        startDate: startInput.value,
+        endDate: endInput.value
     };
 
     try {
-        const response = await fetch('/api/inquiries', {
+        const response = await fetch('http://localhost:8080/api/booking/book', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token') // Ensure token exists
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(bookingData)
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to submit inquiry');
+        if (response.ok) {
+            msg.textContent = "✅ Booking request sent successfully!";
+            msg.style.color = "green";
+            document.getElementById('bookBtn').disabled = true;
+        } else {
+            const errorText = await response.text();
+            msg.textContent = "❌ Booking failed: " + errorText;
+            msg.style.color = "red";
         }
-
-        alert('✅ Your inquiry has been submitted successfully! The landlord will contact you soon.');
-        contactForm.reset();
-
-    } catch (err) {
-        console.error('Error submitting inquiry:', err);
-        alert('❌ Failed to submit inquiry. Please try again or contact the landlord directly.');
+    } catch (error) {
+        console.error("Booking error:", error);
+        msg.textContent = "❌ Error connecting to server.";
+        msg.style.color = "red";
     }
-});
+}
+
+// Handle contact form submission
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            propertyId: propertyId,
+            propertyName: propertyData?.name || 'Unknown Property',
+            name: document.getElementById('contactName').value,
+            email: document.getElementById('contactEmail').value,
+            phone: document.getElementById('contactPhone').value,
+            message: document.getElementById('contactMessage').value
+        };
+
+        try {
+            const response = await fetch('/api/inquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) throw new Error('Failed to submit inquiry');
+
+            alert('✅ Your inquiry has been submitted successfully!');
+            contactForm.reset();
+
+        } catch (err) {
+            alert('❌ Failed to submit inquiry.');
+        }
+    });
+}

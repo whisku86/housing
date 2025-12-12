@@ -4,50 +4,55 @@ import com.smart_housing.smart_housing.model.Booking;
 import com.smart_housing.smart_housing.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/student/bookings")
+@RequestMapping("/api/booking") // FIXED: Matches your Frontend logic
 @RequiredArgsConstructor
-@CrossOrigin
+@CrossOrigin(origins = "*") // Allows frontend to access this
 public class BookingController {
 
     private final BookingService bookingService;
 
-    @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestParam Long roomId,
-                                                 @RequestParam LocalDate start,
-                                                 @RequestParam LocalDate end,
-                                                 @AuthenticationPrincipal UserDetails user) {
-        Long studentId = extractStudentId(user);
-        Booking booking = bookingService.createBooking(studentId, roomId, start, end);
-        return ResponseEntity.ok(booking);
+    // 1. CREATE BOOKING (Fixed to accept JSON Body)
+    @PostMapping("/book")
+    public ResponseEntity<?> createBooking(@RequestBody BookingRequest request) {
+        try {
+            // We use the ID sent from the frontend (simpler and less prone to errors)
+            Booking booking = bookingService.createBooking(
+                    request.studentId,
+                    request.propertyId,
+                    request.startDate,
+                    request.endDate
+            );
+            return ResponseEntity.ok(booking);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Booking>> getMyBookings(@AuthenticationPrincipal UserDetails user) {
-        Long studentId = extractStudentId(user);
+    // 2. GET BOOKINGS FOR A STUDENT
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<Booking>> getMyBookings(@PathVariable Long studentId) {
         List<Booking> bookings = bookingService.myBookings(studentId);
         return ResponseEntity.ok(bookings);
     }
 
+    // 3. CANCEL BOOKING
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelBooking(@PathVariable Long id,
-                                              @AuthenticationPrincipal UserDetails user) {
-        Long studentId = extractStudentId(user);
+    public ResponseEntity<Void> cancelBooking(@PathVariable Long id, @RequestParam Long studentId) {
         bookingService.cancelBooking(id, studentId);
         return ResponseEntity.noContent().build();
     }
 
-    private Long extractStudentId(UserDetails user) {
-        if (user == null || user.getUsername() == null) {
-            throw new IllegalArgumentException("Authenticated user is missing or invalid");
-        }
-        return Long.valueOf(user.getUsername()); // Assumes JWT subject is studentId
+    // DTO Helper Class
+    public static class BookingRequest {
+        public Long studentId;
+        public Long propertyId;
+        public LocalDate startDate;
+        public LocalDate endDate;
     }
 }

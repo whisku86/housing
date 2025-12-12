@@ -108,64 +108,54 @@
         <button type="button" onclick="signup()">Create Account</button>
         <p>Already have an account? <a href="login.html" >Sign In</a></p>
     </form>
-
+</div>
    
 
 <script>
-    
-  // Toggle between login & signup form
-  function toggleForm() {
-      document.getElementById("loginForm").classList.toggle("hidden");
-      document.getElementById("signupForm").classList.toggle("hidden");
-  }
 
-  // Signup Functionality (Send to Spring Boot)
-  async function signup() {
-      let name = document.getElementById("signupName").value;
-      let email = document.getElementById("signupEmail").value;
-      let phone = document.getElementById("signupPhone").value;
-      let password = document.getElementById("signupPassword").value;
-      let confirmPassword = document.getElementById("signupConfirmPassword").value;
+    async function signup() {
+        let name = document.getElementById("signupName").value;
+        let email = document.getElementById("signupEmail").value;
+        let phone = document.getElementById("signupPhone").value;
+        let password = document.getElementById("signupPassword").value;
+        let confirmPassword = document.getElementById("signupConfirmPassword").value;
 
-      if (!name || !email || !phone || !password || !confirmPassword) {
-          alert("Please fill in all fields!");
-          return;
-      }
-      if(email ==email){
-        alert('Account already exists');
-        return
-      }
+        if (!name || !email || !phone || !password || !confirmPassword) {
+            alert("Please fill in all fields!");
+            return;
+        }
 
-      if (password !== confirmPassword) {
-          alert("Passwords do not match!");
-          return;
-      }
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
 
-      const student = {
-          name: name,
-          email: email,
-          phoneNumber: phone,
-          password: password
-      };
+        const student = {
+            name: name,
+            email: email,
+            phoneNumber: phone,
+            password: password
+        };
 
-      const response = await fetch("http://127.0.0.1:8080/api/students/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(student)
-      });
+        try {
+            const response = await fetch("/api/students/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(student)
+            });
 
-      if (response.ok) {
-          alert("Account Created Successfully!");
-          window.location.href="index.html";
-      } else {
-          alert("Signup failed. Please try again.");
-      }
-  }
+            const result = await response.text();
 
-  
-  
-
-
+            if (response.ok) {
+                alert(result);
+                window.location.href = "index.html";
+            } else {
+                alert("Signup failed: " + result);
+            }
+        } catch (error) {
+            alert("Network error: " + error.message);
+        }
+    }
 </script>
 </body>
 </html>
